@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -13,6 +14,8 @@ mcp.mount(auth_tools.mcp)
 mcp.mount(tasks.mcp)
 mcp.mount(projects.mcp)
 
+logger = logging.getLogger(__name__)
+
 
 def main() -> None:
     missing = [v for v in ("TICKTICK_CLIENT_ID", "TICKTICK_CLIENT_SECRET") if not os.environ.get(v)]
@@ -24,4 +27,10 @@ def main() -> None:
         )
         sys.exit(1)
 
-    mcp.run()
+    host = os.environ.get("MCP_HOST", "0.0.0.0")
+    port = int(os.environ.get("MCP_PORT", "8000"))
+
+    logging.basicConfig(level=logging.INFO)
+    logger.info("Starting ticktick-mcp on %s:%d (SSE)", host, port)
+
+    mcp.run(transport="sse", host=host, port=port)

@@ -17,3 +17,9 @@ dependencies = [
 
 [project.scripts]
 ticktick-mcp = "ticktick_mcp.server:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.15.5",
+]
