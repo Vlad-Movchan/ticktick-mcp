@@ -1,0 +1,6 @@
+.venv/
+openspec/
+.env
+*.pyc
+__pycache__/
+.git/

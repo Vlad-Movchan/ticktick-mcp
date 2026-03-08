@@ -5,7 +5,7 @@ from pathlib import Path
 
 import httpx
 
-from ticktick_mcp.config import get_settings
+from productivity_mcp.providers.ticktick.config import get_settings
 
 TICKTICK_AUTH_URL = "https://ticktick.com/oauth/authorize"
 TICKTICK_TOKEN_URL = "https://ticktick.com/oauth/token"

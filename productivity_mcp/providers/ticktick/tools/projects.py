@@ -1,7 +1,7 @@
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
-from ticktick_mcp import client
+from productivity_mcp.providers.ticktick import client
 
 mcp = FastMCP("projects")
 

@@ -1,7 +1,7 @@
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
-from ticktick_mcp.auth import exchange_code, get_auth_url, save_tokens
+from productivity_mcp.providers.ticktick.auth import exchange_code, get_auth_url, save_tokens
 
 mcp = FastMCP("auth")
 

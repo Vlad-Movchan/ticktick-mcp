@@ -1,6 +1,6 @@
 import httpx
 
-from ticktick_mcp.auth import get_valid_token
+from productivity_mcp.providers.ticktick.auth import get_valid_token
 
 BASE_URL = "https://api.ticktick.com/open/v1"
 

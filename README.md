@@ -1,6 +1,6 @@
-# ticktick-mcp
+# productivity-mcp
 
-An MCP server that lets AI assistants (Claude, etc.) manage your TickTick tasks and projects via the TickTick Open API v2.
+A universal MCP server that lets AI assistants (Claude, etc.) manage productivity tools via their APIs. Currently ships a TickTick integration; designed to add more providers without touching core server code.
 
 ## Requirements
 
@@ -45,6 +45,20 @@ TICKTICK_TOKEN_PATH=/path/to/tokens.json
 
 ## Running the server
 
+### Docker (recommended)
+
+```bash
+docker compose up --build
+```
+
+The server starts on `http://localhost:8000/sse`. Tokens are persisted in a named Docker volume (`ticktick-tokens`) and survive container restarts.
+
+### Local (uv)
+
+```bash
+uv run productivity-mcp
+```
+
 ### Claude Desktop
 
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
@@ -52,9 +66,9 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "ticktick": {
+    "productivity": {
       "command": "uv",
-      "args": ["--directory", "/absolute/path/to/ticktick-mcp", "run", "ticktick-mcp"],
+      "args": ["--directory", "/absolute/path/to/ticktick-mcp", "run", "productivity-mcp"],
       "env": {
         "TICKTICK_CLIENT_ID": "your_client_id",
         "TICKTICK_CLIENT_SECRET": "your_client_secret"
@@ -67,16 +81,10 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ### Claude Code
 
 ```bash
-claude mcp add ticktick -- uv --directory /absolute/path/to/ticktick-mcp run ticktick-mcp
+claude mcp add productivity -- uv --directory /absolute/path/to/ticktick-mcp run productivity-mcp
 ```
 
 Set credentials in `.env` or export them before launching Claude Code.
-
-### Standalone (stdio)
-
-```bash
-uv run ticktick-mcp
-```
 
 ## Available tools
 
@@ -91,6 +99,14 @@ uv run ticktick-mcp
 | `ticktick_complete_task` | Mark a task as complete |
 | `ticktick_delete_task` | Delete a task |
 
+## Adding a new provider
+
+1. Create `productivity_mcp/providers/<name>/` with your integration code.
+2. Expose `REQUIRED_ENV_VARS: list[str]` and `register(mcp: FastMCP) -> None` in its `__init__.py`.
+3. Add it to `PROVIDERS` in `productivity_mcp/server.py`.
+
+The server will automatically validate its env vars at startup and mount its tools.
+
 ## Security
 
-Token file permissions are set to `600` on creation. Never commit `.env` or `~/.ticktick-mcp/tokens.json` to version control.
+Token file permissions are set to `600` on creation. Never commit `.env` or token files to version control.

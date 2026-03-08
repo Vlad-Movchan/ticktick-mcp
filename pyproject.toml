@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ticktick-mcp"
+name = "productivity-mcp"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ticktick-mcp = "ticktick_mcp.server:main"
+productivity-mcp = "productivity_mcp.server:main"
 
 [dependency-groups]
 dev = [
