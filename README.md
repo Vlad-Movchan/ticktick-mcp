@@ -23,25 +23,32 @@ Create a `.env` file in the project root:
 ```env
 TICKTICK_CLIENT_ID=your_client_id
 TICKTICK_CLIENT_SECRET=your_client_secret
+TICKTICK_REDIRECT_URI=http://localhost:8000/callback
+```
+
+> **Important**: `TICKTICK_REDIRECT_URI` must point to the server's `/callback` endpoint. Register this same URL in your TickTick OAuth app's allowed redirect URIs.
+
+Optional variables:
+
+```env
+MCP_HOST=0.0.0.0
+MCP_PORT=8000
+MCP_BASE_URL=http://localhost:8000   # public URL used in OAuth metadata
+TICKTICK_TOKEN_PATH=/path/to/tokens.json
 ```
 
 ### 3. Authorize with TickTick
 
-Run the authorization flow through your MCP client by calling the `ticktick_authorize` tool:
+**MCP-native OAuth (recommended)** — MCP clients that support OAuth 2.1 (e.g. Claude Desktop with remote MCP) handle the flow automatically. Just point your client at `http://<host>:<port>/mcp` and it will open a browser for authorization.
 
-1. Call `ticktick_authorize` with no arguments — the tool returns an authorization URL.
+**Manual fallback** — for clients that don't support MCP OAuth:
+
+1. Call `ticktick_authorize` with no arguments — returns an authorization URL.
 2. Open the URL in your browser and approve access.
-3. You will be redirected to `http://localhost?code=<CODE>&...` (the page won't load — that's expected).
-4. Copy the `code` value from the URL.
-5. Call `ticktick_authorize(code="<CODE>")` to exchange it for tokens.
+3. You will be redirected to your `TICKTICK_REDIRECT_URI?code=<CODE>` — copy the `code`.
+4. Call `ticktick_authorize(code="<CODE>")` to exchange it for tokens.
 
 Tokens are saved to `~/.ticktick-mcp/tokens.json` (permissions `600`) and auto-refreshed on each request.
-
-To use a different token path:
-
-```env
-TICKTICK_TOKEN_PATH=/path/to/tokens.json
-```
 
 ## Running the server
 
@@ -51,7 +58,7 @@ TICKTICK_TOKEN_PATH=/path/to/tokens.json
 docker compose up --build
 ```
 
-The server starts on `http://localhost:8000/sse`. Tokens are persisted in a named Docker volume (`ticktick-tokens`) and survive container restarts.
+The server starts on `http://localhost:8000/mcp`. Tokens are persisted in a named Docker volume (`ticktick-tokens`) and survive container restarts.
 
 ### Local (uv)
 
@@ -68,7 +75,12 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "productivity": {
       "command": "uv",
-      "args": ["--directory", "/absolute/path/to/ticktick-mcp", "run", "productivity-mcp"],
+      "args": [
+        "--directory",
+        "/absolute/path/to/ticktick-mcp",
+        "run",
+        "productivity-mcp"
+      ],
       "env": {
         "TICKTICK_CLIENT_ID": "your_client_id",
         "TICKTICK_CLIENT_SECRET": "your_client_secret"
@@ -88,16 +100,16 @@ Set credentials in `.env` or export them before launching Claude Code.
 
 ## Available tools
 
-| Tool | Description |
-|------|-------------|
-| `ticktick_authorize` | OAuth 2.0 authorization flow |
-| `ticktick_list_projects` | List all projects |
-| `ticktick_get_project_tasks` | Get tasks in a project |
-| `ticktick_create_task` | Create a new task |
-| `ticktick_get_task` | Get task details |
-| `ticktick_update_task` | Update task fields |
-| `ticktick_complete_task` | Mark a task as complete |
-| `ticktick_delete_task` | Delete a task |
+| Tool                         | Description                                    |
+| ---------------------------- | ---------------------------------------------- |
+| `ticktick_authorize`         | OAuth 2.0 authorization flow (manual fallback) |
+| `ticktick_list_projects`     | List all projects                              |
+| `ticktick_get_project_tasks` | Get tasks in a project                         |
+| `ticktick_create_task`       | Create a new task                              |
+| `ticktick_get_task`          | Get task details                               |
+| `ticktick_update_task`       | Update task fields                             |
+| `ticktick_complete_task`     | Mark a task as complete                        |
+| `ticktick_delete_task`       | Delete a task                                  |
 
 ## Adding a new provider
 
