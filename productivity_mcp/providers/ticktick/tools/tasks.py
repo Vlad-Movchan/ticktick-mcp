@@ -2,6 +2,7 @@ from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
 from productivity_mcp.providers.ticktick import client
+from productivity_mcp.providers.ticktick.schemas import Reminder, TaskItem
 
 mcp = FastMCP("tasks")
 
@@ -14,6 +15,10 @@ def ticktick_create_task(
     dueDate: str | None = None,
     startDate: str | None = None,
     priority: int | None = None,
+    tags: list[str] | None = None,
+    repeatFlag: str | None = None,
+    items: list[TaskItem] | None = None,
+    reminders: list[Reminder] | None = None,
 ) -> dict:
     """Create a new task in TickTick.
 
@@ -24,6 +29,10 @@ def ticktick_create_task(
         startDate: Start date in ISO 8601 format (e.g. 2024-12-31T00:00:00+0000).
         dueDate: Due date in ISO 8601 format (e.g. 2024-12-31T00:00:00+0000).
         priority: Priority level: 0=none, 1=low, 3=medium, 5=high.
+        tags: List of tag names (e.g. ["deepwork", "health"]).
+        repeatFlag: Recurrence rule in RRULE format (e.g. "RRULE:FREQ=WEEKLY;BYDAY=TU,TH").
+        items: Checklist items within the task.
+        reminders: Reminders for the task (e.g. [{"trigger": "TRIGGER:-PT15M"}]).
     """
     body: dict = {"title": title}
     if projectId is not None:
@@ -36,6 +45,14 @@ def ticktick_create_task(
         body["dueDate"] = dueDate
     if priority is not None:
         body["priority"] = priority
+    if tags is not None:
+        body["tags"] = tags
+    if repeatFlag is not None:
+        body["repeatFlag"] = repeatFlag
+    if items is not None:
+        body["items"] = [i.model_dump() for i in items]
+    if reminders is not None:
+        body["reminders"] = [r.model_dump() for r in reminders]
 
     try:
         task = client.request("POST", "/task", json=body)
@@ -67,6 +84,10 @@ def ticktick_update_task(
     startDate: str | None = None,
     dueDate: str | None = None,
     priority: int | None = None,
+    tags: list[str] | None = None,
+    repeatFlag: str | None = None,
+    items: list[TaskItem] | None = None,
+    reminders: list[Reminder] | None = None,
 ) -> dict:
     """Update fields on an existing task.
 
@@ -78,6 +99,10 @@ def ticktick_update_task(
         startDate: Start date in ISO 8601 format (e.g. 2024-12-31T00:00:00+0000).
         dueDate: New due date in ISO 8601 format.
         priority: New priority: 0=none, 1=low, 3=medium, 5=high.
+        tags: Updated list of tag names.
+        repeatFlag: Recurrence rule in RRULE format.
+        items: Updated checklist items.
+        reminders: Updated reminders.
     """
     body: dict = {"id": taskId, "projectId": projectId}
     if title is not None:
@@ -85,11 +110,19 @@ def ticktick_update_task(
     if content is not None:
         body["content"] = content
     if startDate is not None:
-        body["startDate"] = dueDate
+        body["startDate"] = startDate
     if dueDate is not None:
         body["dueDate"] = dueDate
     if priority is not None:
         body["priority"] = priority
+    if tags is not None:
+        body["tags"] = tags
+    if repeatFlag is not None:
+        body["repeatFlag"] = repeatFlag
+    if items is not None:
+        body["items"] = [i.model_dump() for i in items]
+    if reminders is not None:
+        body["reminders"] = [r.model_dump() for r in reminders]
 
     try:
         return client.request("POST", f"/task/{taskId}", json=body)
